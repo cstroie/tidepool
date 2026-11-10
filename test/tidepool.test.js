@@ -42,7 +42,7 @@ test('a first visit, a cairn, leaving, and a week away: the pool has changed', {
     v.start('/100'); v.run(1);
     assert.match(v.text(), /a very slow garden you can't control/);
     v.type(' '); v.run(1);
-    assert.match(v.text(), /day 1 /);
+    assert.match(v.text(), /day 1, /);
     assert.match(v.text(), /Cairn stones: o o o o o \(5 left\)/);
     v.type('3'); v.run(0.3); v.type(' '); v.run(0.5);
     assert.match(v.text(), /Cairn stones: \^ o o o o \(4 left\)/);
@@ -60,7 +60,7 @@ test('a first visit, a cairn, leaving, and a week away: the pool has changed', {
     assert.match(v.text(), /While you were gone:/);
     assert.match(v.text(), /settled on/);
     v.type(' '); v.run(2);
-    assert.match(v.text(), /day 8 /);
+    assert.match(v.text(), /day 8, /);
     assert.match(v.text(), /Cairn stones: \^ o o o o \(4 left\)/);
     // the cairn rock has been quiet for the whole of its time, the one you walked over since you left
     assert.equal(quiet(v, '3'), n + 1);
@@ -121,4 +121,72 @@ test('a very long absence counts at most CAP tides, in a few seconds of machine 
     assert.match(v.text(), /You were away for 1825 days\.\s+2000 tides came and went/);
     v.type(' '); v.run(2);
     assert.match(v.text(), /Cairn stones/);
+});
+
+test('the seasons: the header names the season of the date', { skip: !haveRoot }, async () => {
+    for (const [when, season] of [[Date.UTC(2026, 10, 10, 8), 'autumn'], [Date.UTC(2027, 0, 15, 8), 'winter'], [Date.UTC(2027, 3, 10, 8), 'spring'], [Date.UTC(2027, 6, 10, 8), 'summer']]) {
+        const { disk, visit } = await fresh();
+        const v = await visit(disk, when);
+        enter(v);
+        assert.match(v.text(), new RegExp(`day 1, ${season}`), season);
+    }
+});
+
+test('the bell rings when a tide turns, and B turns it off', { skip: !haveRoot }, async () => {
+    const { disk, visit } = await fresh();
+    const v = await visit(disk, T0);
+    let bells = 0;
+    v.term.bell = () => { bells++; };
+    enter(v);
+    bells = 0;
+    v.later(13 * HOUR); v.run(4);
+    assert.ok(bells >= 1, 'rang for the tide');
+    v.type('B'); v.run(0.5);
+    assert.match(v.text(), /The bell is off\./);
+    bells = 0;
+    v.later(13 * HOUR); v.run(4);
+    assert.equal(bells, 0, 'silent');
+});
+
+test('leaving without Q still walks the open rocks, and says so next time', { skip: !haveRoot }, async () => {
+    const { disk, visit } = await fresh();
+    let v = await visit(disk, T0);
+    enter(v);                                  // the tab is closed here: no Q
+    v = await visit(disk, T0 + DAY);
+    v.start('/100'); v.run(6);
+    assert.match(v.text(), /Last time you left without a word/);
+    v.type(' '); v.run(1);
+    v.type('Q'); v.run(2);
+    v = await visit(disk, T0 + 2 * DAY);
+    v.start('/100'); v.run(6);
+    assert.doesNotMatch(v.text(), /left without a word/);
+});
+
+test('a rename does not rewrite the journal; R starts a new pool after a Y', { skip: !haveRoot }, async () => {
+    const { disk, visit } = await fresh();
+    let v = await visit(disk, T0);
+    enter(v); v.type('Q'); v.run(2);
+    v = await visit(disk, T0 + 7 * DAY);
+    v.start('/100'); v.run(8);
+    const name = /settled on ([A-Za-z ]+)\./.exec(v.text())[1];
+    const idx = ['Mossy', 'Anvil', 'Old Tom', 'Saddle', 'Gull', 'Lantern', 'Hearth', 'Knuckle', 'Pilot', 'Drift'].indexOf(name);
+    assert.ok(idx >= 0, name);
+    v.type(' '); v.run(2);
+    v.type(String((idx + 1) % 10)); v.run(0.3);
+    v.type('N'); v.run(0.3); v.type('Zed\r'); v.run(1);
+    assert.match(v.text(), /Zed/);
+    v.type('J'); v.run(2);
+    assert.match(v.text(), new RegExp(`settled on ${name}\\.`));
+    assert.doesNotMatch(v.text(), /settled on Zed/);
+    v.type(' '); v.run(1);
+    v.type('R'); v.run(0.5);
+    assert.match(v.text(), /Start a new pool\?/);
+    v.type('n'); v.run(0.5);
+    assert.match(v.text(), /Zed/, 'any other key keeps the pool');
+    v.type('R'); v.run(0.5); v.type('Y'); v.run(1);
+    assert.match(v.text(), /a very slow garden/);
+    v.type(' '); v.run(1);
+    assert.match(v.text(), /day 1, /);
+    assert.doesNotMatch(v.text(), /Zed/);
+    assert.match(v.text(), /Mossy\s+Anvil/);
 });

@@ -2,6 +2,11 @@
 
 t_title: db     '~ T I D E P O O L ~',0
 t_day:  db      'day ',0
+seasons: dw     ss0,ss1,ss2,ss3
+ss0:    db      'winter',0
+ss1:    db      'spring',0
+ss2:    db      'summer',0
+ss3:    db      'autumn',0
 t_noclk: db     '  (no clock)',0
 t_hw:   db      'High water  ',0
 t_lw:   db      'Low water   ',0
@@ -27,10 +32,10 @@ t_walk: db      'You will cross it when you go.',0
 t_guard: db     'A cairn guards it.',0
 t_latest: db    'Latest: ',0
 t_colon: db     ': ',0
-t_nothing: db   'Nothing has happened yet. Be patient: that is the whole game.',0
+t_nothing: db   'Nothing has happened yet. Choose a rock (1-0), SPACE puts a cairn on it. Then wait.',0
 t_full:  db     'All five stones are placed. Lift a cairn first (SPACE on a rock that has one).',0
 t_nameq: db     'Name this rock (7 letters, Enter): ',0
-t_keys: db      ' arrows/1-0 choose  SPACE cairn  N name  T tides  J journal  ? help  Q leave',0
+t_keys: db      ' 1-0 pick  SPACE cairn  N name  T tides  J log  B bell  R reset  ? help  Q quit',0
 t_press: db     'press a key',0
 t_away: db      'You were away for ',0
 t_and:  db      ' and ',0
@@ -132,3 +137,10 @@ defnames: db    'Mossy',0,0,0
         db      'Knuckle',0
         db      'Pilot',0,0,0
         db      'Drift',0,0,0
+
+t_changed: db   'Rocks that changed: ',0
+t_nochg: db     'none',0
+t_unclean: db   'Last time you left without a word. The open rocks were walked over anyway.',0
+t_bellon: db    'The bell is on: it rings when a tide turns and at low water.',0
+t_belloff: db   'The bell is off.',0
+t_resetq: db    'Start a new pool? Every rock, name and cairn is lost.  Y = yes, any other key = no',0

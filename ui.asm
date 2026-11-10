@@ -92,8 +92,7 @@ fmS:    push    hl
         pop     hl
         jr      fmt
 fmr:    push    hl
-        ld      a,(f_rock)
-        call    rname
+        ld      hl,(f_name)
         call    puts
         pop     hl
         jr      fmt
@@ -173,7 +172,7 @@ drawhead: ld    b,1
         xor     a
         call    setattr
         ld      b,1
-        ld      c,52
+        ld      c,46
         call    gotoxy
         ld      hl,t_day
         call    puts
@@ -185,6 +184,14 @@ drawhead: ld    b,1
         ld      hl,0
 dh0:    inc     hl
         call    pdec
+        ld      hl,t_comma
+        call    puts
+        ld      hl,(cnow)
+        call    calcseason
+        ld      a,(season)
+        ld      hl,seasons
+        call    getp
+        call    puts
         ld      a,(hasclk)
         or      a
         jr      z,dh_nc
@@ -908,7 +915,16 @@ wl2:    ld      a,'.'
         call    pnoun
         ld      hl,t_came
         call    puts
-        ; what happened: the entries newer than the last visit
+        call    chglist
+        ld      a,(unclean)
+        or      a
+        jr      z,wc0
+        ld      b,6
+        ld      c,3
+        call    gotoxy
+        ld      hl,t_unclean
+        call    puts
+wc0:    ; what happened: the entries newer than the last visit
         ld      c,0
 wc1:    ld      a,c
         push    bc
@@ -965,6 +981,47 @@ wc4:    ld      a,(tmp1)
         or      a
         jr      nz,wc4
         jp      pressakey
+
+; chglist: which rocks have a different thing on them than when you left
+chglist: ld     b,5
+        ld      c,3
+        call    gotoxy
+        ld      hl,t_changed
+        call    puts
+        xor     a
+        ld      (tmp1),a
+        ld      (ri),a
+        ld      ix,rocks
+        ld      iy,rocks0
+cg1:    ld      a,(ix+R_SP)
+        cp      (iy+R_SP)
+        jr      z,cg4
+        ld      a,(tmp1)
+        cp      7
+        jr      nc,cg4
+        or      a
+        jr      z,cg2
+        ld      hl,t_comma
+        call    puts
+cg2:    ld      a,(tmp1)
+        inc     a
+        ld      (tmp1),a
+        ld      a,(ri)
+        call    rname
+        call    puts
+cg4:    ld      de,RSZ
+        add     ix,de
+        add     iy,de
+        ld      a,(ri)
+        inc     a
+        ld      (ri),a
+        cp      NROCK
+        jr      c,cg1
+        ld      a,(tmp1)
+        or      a
+        ret     nz
+        ld      hl,t_nochg
+        jp      puts
 
 ; divmod60: HL minutes -> C hours, HL minutes
 divmod60: ld    de,60

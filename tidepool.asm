@@ -81,18 +81,38 @@ s1:     call    parse
         call    awaycalc
         ld      hl,(st_last)
         ld      (oldlast),hl
+        xor     a
+        ld      (unclean),a
+        ld      a,(st_clean)    ; the last visit did not end with Q: walk the open rocks now
+        or      a
+        jr      nz,s2
+        ld      (curc),hl
+        call    trample
+        ld      a,1
+        ld      (unclean),a
+s2:     ld      hl,rocks        ; what the rocks were, to say which changed
+        ld      de,rocks0
+        ld      bc,NROCK*RSZ
+        ldir
         ld      a,1
         ld      (verbose),a
         call    catchup
         ld      hl,(ndone)
         ld      a,h
         or      l
+        ld      a,(unclean)
+        jr      nz,s3
+        or      a
         jr      z,go
-        call    welcome
+s3:     call    welcome
         jr      go
 fresh:  call    initpool
         call    intro
-go:     call    stampsave
+go:     xor     a
+        ld      (st_clean),a    ; clean again only when you leave with Q
+        call    stampsave
+        ld      hl,(pnow)
+        ld      (lastp),hl
         xor     a
         ld      (sel),a
         ld      (wavef),a
@@ -112,37 +132,41 @@ mk:     call    upcase
         cp      'Q'
         jp      z,quit
         cp      19              ; left
-        jr      z,m_left
+        jp      z,m_left
         cp      ','
-        jr      z,m_left
+        jp      z,m_left
         cp      '<'
-        jr      z,m_left
+        jp      z,m_left
         cp      4               ; right
-        jr      z,m_right
+        jp      z,m_right
         cp      '.'
-        jr      z,m_right
+        jp      z,m_right
         cp      '>'
-        jr      z,m_right
+        jp      z,m_right
         cp      ' '
-        jr      z,m_mark
+        jp      z,m_mark
         cp      CR
-        jr      z,m_mark
+        jp      z,m_mark
         cp      'N'
-        jr      z,m_name
+        jp      z,m_name
+        cp      'B'
+        jp      z,m_bell
+        cp      'R'
+        jp      z,m_reset
         cp      'T'
-        jr      z,m_tide
+        jp      z,m_tide
         cp      'J'
-        jr      z,m_jrnl
+        jp      z,m_jrnl
         cp      '?'
-        jr      z,m_help
+        jp      z,m_help
         cp      '0'
-        jr      z,m_zero
+        jp      z,m_zero
         cp      '1'
         jp      c,main
         cp      '9'+1
         jp      nc,main
         sub     '1'
-        jr      m_pick
+        jp      m_pick
 m_zero: ld      a,9
 m_pick: ld      (sel),a
         call    drawlow
@@ -151,23 +175,62 @@ m_left: ld      a,(sel)
         or      a
         jp      z,main
         dec     a
-        jr      m_pick
+        jp      m_pick
 m_right: ld     a,(sel)
         cp      NROCK-1
         jp      nc,main
         inc     a
-        jr      m_pick
+        jp      m_pick
 m_mark: call    toggle
         jp      main
 m_name: call    namerock
         jp      main
 m_tide: call    tidescr
-        jr      m_back
+        jp      m_back
 m_jrnl: call    jrnlscr
-        jr      m_back
+        jp      m_back
 m_help: call    intro
 m_back: call    drawall
         jp      main
+m_bell: ld      a,(st_mute)
+        xor     1
+        ld      (st_mute),a
+        call    save
+        ld      hl,t_bellon
+        or      a
+        jr      z,mb1
+        ld      hl,t_belloff
+mb1:    call    msg
+        ld      a,(st_mute)
+        or      a
+        jp      nz,main
+        ld      a,7
+        call    putc
+        jp      main
+m_reset: ld     hl,t_resetq
+        call    msg
+        call    getkey
+        call    upcase
+        cp      'Y'
+        jr      z,mr1
+        call    drawlatest
+        jp      main
+mr1:    ld      a,(term)
+        push    af
+        ld      a,(st_mute)
+        push    af
+        call    blank
+        pop     af
+        ld      (st_mute),a
+        pop     af
+        ld      (term),a
+        call    initpool
+        xor     a
+        ld      (sel),a
+        ld      (st_clean),a
+        call    stampsave
+        call    intro
+        jp      m_back
 
 ; ---------------------------------------------------------------- the clock, live
 poll:   ld      a,(hasclk)
@@ -186,7 +249,21 @@ poll:   ld      a,(hasclk)
         call    stampsave
         ld      a,1
         ld      (dirty),a
-po2:    ld      hl,(mdnow)      ; a new minute: the clock and the tide
+        ld      (bellf),a       ; a tide has turned
+po2:    ld      hl,(lastp)      ; low water passed?
+        ld      de,LOWMIN
+        or      a
+        sbc     hl,de
+        jr      nc,pb1
+        ld      hl,(pnow)
+        or      a
+        sbc     hl,de
+        jr      c,pb1
+        ld      a,1
+        ld      (bellf),a
+pb1:    ld      hl,(pnow)
+        ld      (lastp),hl
+        ld      hl,(mdnow)      ; a new minute: the clock and the tide
         ld      de,(lastmd)
         or      a
         sbc     hl,de
@@ -219,14 +296,24 @@ po3:    ld      a,(wtick)       ; the waves move every second or two
         call    drawrow
 po4:    ld      a,(dirty)
         or      a
-        ret     z
+        jr      z,po5
         xor     a
         ld      (dirty),a
         call    drawhead
         call    drawscene
         call    drawstrip
         call    drawpane
-        jp      drawlatest
+        call    drawlatest
+po5:    ld      a,(bellf)       ; the bell, for a tide that turns while you watch
+        or      a
+        ret     z
+        xor     a
+        ld      (bellf),a
+        ld      a,(st_mute)
+        or      a
+        ret     nz
+        ld      a,7
+        jp      putc
 
 ; stampsave: this moment is the last visit
 stampsave: ld   hl,(mnow)
@@ -278,6 +365,9 @@ catchup: ld     hl,0
         ld      hl,CAP
 cu1:    ld      (ndone),hl
         ld      (ntides),hl
+        ld      hl,(st_last)
+        inc     hl
+        call    calcseason
         ld      a,(verbose)
         or      a
         jr      z,cu2
@@ -309,17 +399,19 @@ cu3:    ld      hl,(ntides)
 ; ---------------------------------------------------------------- a new pool
 blank:  ld      hl,state
         ld      de,state+1
-        ld      bc,255
+        ld      bc,383
         ld      (hl),0
         ldir
         ld      a,'T'
         ld      (state),a
         ld      a,'P'
         ld      (state+1),a
-        ld      a,1
+        ld      a,2
         ld      (state+2),a
         ld      a,0ffh
         ld      (term),a
+        ld      a,1
+        ld      (st_clean),a
         ret
 
 initpool: ld    hl,defnames
@@ -390,6 +482,8 @@ q3:     ld      de,RSZ
         ld      hl,t_stepped
 q4:     call    puts
         call    trample
+        ld      a,1
+        ld      (st_clean),a
         call    stampsave
         ld      b,12
         ld      hl,t_bye
@@ -427,7 +521,7 @@ q5:     ld      b,16
 
 progend:
 ; ---------------------------------------------------------------- memory, after the program
-state   equ     progend         ; what TIDEPOOL.SAV holds: 256 bytes
+state   equ     progend         ; what TIDEPOOL.SAV holds: 384 bytes
 term    equ     state+3
 st_bday equ     state+4
 st_last equ     state+6
@@ -435,11 +529,13 @@ rseed   equ     state+8
 st_seen equ     state+10
 st_jhead equ    state+14
 st_jcnt equ     state+15
-rocks   equ     state+16
+st_clean equ    state+16        ; 1 when the last visit ended with Q
+st_mute equ     state+17        ; 1 when the bell is off
+rocks   equ     state+20
 names   equ     state+64
 jrnl    equ     state+144
 
-v0      equ     state+256
+v0      equ     state+384
 oldsp   equ     v0+0
 loaded  equ     v0+2
 hasclk  equ     v0+3
@@ -483,6 +579,12 @@ plotp   equ     v0+76
 tmp1    equ     v0+78
 tmp2    equ     v0+80
 namebuf equ     v0+82
-scn     equ     v0+96           ; the pool, 12 rows of 80
+season  equ     v0+90
+bellf   equ     v0+91
+lastp   equ     v0+92
+unclean equ     v0+94
+f_name  equ     v0+95
+rocks0  equ     v0+97           ; 40 bytes
+scn     equ     v0+144          ; the pool, 12 rows of 80
 stackb  equ     scn+960
 stack   equ     stackb+256

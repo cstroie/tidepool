@@ -1,7 +1,7 @@
-; save.asm: TIDEPOOL.SAV, two records straight from `state`. Saved on every cairn, every name,
+; save.asm: TIDEPOOL.SAV, three records straight from `state`. Saved on every cairn, every name,
 ; every tide and when you leave; read at the start.
 
-SAVEREC equ     2
+SAVEREC equ     3
 
 fcbclr: ld      hl,fcb_sav+12
         ld      de,fcb_sav+13
@@ -73,7 +73,7 @@ lo1:    push    bc
         cp      'P'
         jr      nz,ld_bad
         ld      a,(state+2)
-        cp      1
+        cp      2
         jr      nz,ld_bad
         ld      a,1
         ret

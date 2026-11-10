@@ -8,10 +8,16 @@
 ; ---------------------------------------------------------------- one tide
 ; simtide: HL = the number of this tide
 simtide: ld     (curc),hl
+        ld      a,l
+        and     15
+        call    z,seasonnow     ; the season is looked up every 16 tides (about 8 days)
         xor     a
         ld      (storm),a
+        ld      hl,tb_storm
+        call    sget
+        ld      b,a
         call    rnd
-        cp      9
+        cp      b
         jr      nc,stm0
         ld      a,1
         ld      (storm),a
@@ -82,12 +88,104 @@ becomes: ld     (ix+R_SP),a
         ret
 
 ; grow: B = how much. Returns A = the growth.
-grow:   ld      a,(ix+R_G)
+grow:   ld      a,(season)      ; winter halves it, summer adds a quarter
+        or      a
+        jr      nz,gr0
+        srl     b
+        jr      nz,gr2
+        inc     b
+        jr      gr2
+gr0:    cp      2
+        jr      nz,gr2
+        ld      a,b
+        srl     a
+        srl     a
+        add     a,b
+        ld      b,a
+gr2:    ld      a,(ix+R_G)
         add     a,b
         jr      nc,gr1
         ld      a,255
 gr1:    ld      (ix+R_G),a
         ret
+
+seasonnow: ld   hl,(curc)
+        jp      calcseason
+
+; sget: HL = four bytes (winter, spring, summer, autumn) -> A = this season's
+sget:   ld      a,(season)
+        ld      e,a
+        ld      d,0
+        add     hl,de
+        ld      a,(hl)
+        ret
+
+; calcseason: HL = a tide -> season: 0 winter, 1 spring, 2 summer, 3 autumn (December to
+; February, and so on; the calendar is the real one, with a leap year every fourth from 1978)
+calcseason: ld  de,TIDE            ; the day of the tide, to the nearest
+        call    mul32
+        ld      hl,(m32)
+        ld      de,720
+        add     hl,de
+        ld      (m32),hl
+        jr      nc,ys0
+        ld      hl,(m32+2)
+        inc     hl
+        ld      (m32+2),hl
+ys0:    ld      de,1440
+        call    div32
+        ld      hl,(m32)
+        dec     hl              ; days since 1 Jan 1978, from 0
+        ld      de,1461         ; four years
+ys1:    or      a
+        sbc     hl,de
+        jr      nc,ys1
+        add     hl,de
+        ld      de,365
+        or      a
+        sbc     hl,de
+        jr      c,ys5
+        or      a
+        sbc     hl,de
+        jr      c,ys5
+        ld      de,366          ; 1980, a leap year
+        or      a
+        sbc     hl,de
+        jr      nc,ys6
+        add     hl,de
+        ld      de,59           ; after 29 February the date runs a day behind the count
+        push    hl
+        or      a
+        sbc     hl,de
+        pop     hl
+        jr      c,ys6
+        dec     hl
+        jr      ys6
+ys5:    add     hl,de
+ys6:    ld      b,0             ; the seasons start on 1 March, 1 June, 1 September, 1 December
+        ld      de,59
+        call    yscmp
+        ld      de,151
+        call    yscmp
+        ld      de,243
+        call    yscmp
+        ld      de,334
+        call    yscmp
+        ld      a,b
+        and     3
+        ld      (season),a
+        ret
+yscmp:  push    hl
+        or      a
+        sbc     hl,de
+        pop     hl
+        ret     c
+        inc     b
+        ret
+
+tb_storm: db    14,7,4,12
+tb_settle: db   30,80,56,56
+tb_crab: db     4,6,10,6
 
 ; senesce: a full grown thing may let go, and leave a film
 senesce: ld     a,(ix+R_G)
@@ -114,8 +212,11 @@ leave:  ld      c,(ix+R_SP)
         jp      evlog
 
 ; crab: a hermit crab may cross a bare rock
-crab:   call    rnd
-        cp      6
+crab:   ld      hl,tb_crab
+        call    sget
+        ld      c,a
+        call    rnd
+        cp      c
         ret     nc
         ld      a,SP_CRAB
         ld      b,100
@@ -138,8 +239,11 @@ h_film: call    rnd
         cp      96
         jr      nc,hf1
         jr      crab
-hf1:    call    rnd
-        cp      56
+hf1:    ld      hl,tb_settle
+        call    sget
+        ld      c,a
+        call    rnd
+        cp      c
         ret     nc
         call    rnd
         ld      b,SP_BARN
@@ -240,22 +344,14 @@ evlog:  ld      d,a
 ; evlogg: the same for the whole pool (rock 255)
 evlogg: ld      d,a
         ld      c,0ffh
-evlog2: ld      a,d
-        rlca
-        rlca
-        rlca
-        rlca
-        or      b
-        ld      e,a
-        ld      a,(st_jhead)
-        ld      h,0
-        ld      l,a
-        add     hl,hl
-        add     hl,hl
+; an entry is 12 bytes: the tide (word), the rock, event << 4 | species, and the rock's name as
+; it was then (8 bytes), so a rename does not rewrite the past
+evlog2: push    bc
         push    de
-        ld      de,jrnl
-        add     hl,de
+        ld      a,(st_jhead)
+        call    jaddr
         pop     de
+        pop     bc
         ld      a,(curc)
         ld      (hl),a
         inc     hl
@@ -264,8 +360,30 @@ evlog2: ld      a,d
         inc     hl
         ld      (hl),c
         inc     hl
-        ld      (hl),e
-        ld      a,(st_jhead)
+        ld      a,d
+        rlca
+        rlca
+        rlca
+        rlca
+        or      b
+        ld      (hl),a
+        inc     hl
+        ld      a,c
+        cp      0ffh
+        jr      z,el_g
+        push    hl
+        call    rname
+        pop     de
+        ld      bc,8
+        ldir
+        jr      el_adv
+el_g:   ld      (hl),0
+        ld      d,h
+        ld      e,l
+        inc     de
+        ld      bc,7
+        ldir
+el_adv: ld      a,(st_jhead)
         inc     a
         and     15
         ld      (st_jhead),a
@@ -274,6 +392,19 @@ evlog2: ld      a,d
         ret     z
         inc     a
         ld      (st_jcnt),a
+        ret
+
+; jaddr: A = an entry number -> HL = its address
+jaddr:  ld      l,a
+        ld      h,0
+        add     hl,hl
+        add     hl,hl
+        ld      d,h
+        ld      e,l
+        add     hl,hl
+        add     hl,de
+        ld      de,jrnl
+        add     hl,de
         ret
 
 ; jent: A = 0 for the newest entry, 1 the one before ... -> HL = the entry, carry if none
@@ -286,19 +417,15 @@ jent:   ld      b,a
         dec     a
         sub     b
         and     15
-        ld      h,0
-        ld      l,a
-        add     hl,hl
-        add     hl,hl
-        ld      de,jrnl
-        add     hl,de
+        call    jaddr
         or      a
         ret
 je_no:  scf
         ret
 
 ; jprint: HL = an entry; prints its sentence
-jprint: inc     hl
+jprint: push    hl
+        inc     hl
         inc     hl
         ld      a,(hl)
         ld      (f_rock),a
@@ -312,6 +439,12 @@ jprint: inc     hl
         rrca
         rrca
         and     15
+        ld      c,a
+        pop     hl
+        ld      de,4
+        add     hl,de
+        ld      (f_name),hl
+        ld      a,c
         ld      hl,evtab
         call    getp
         jp      fmt
