@@ -1,0 +1,200 @@
+# TIDEPOOL art. Every picture is 5 rows of 8 columns between |bars| (so trailing spaces survive);
+# the rock is 3 rows. A space is transparent. Order is fixed: rock, then film, barnacles, kelp,
+# mussels, anemone, sea star, hermit crab, urchin, four growth stages each. node mkart.js checks
+# the sizes and writes art.inc.
+rock
+|  .--.  |
+| /.::.\ |
+|/.::.:.\|
+film 0
+|        |
+|        |
+|        |
+|        |
+|  .   ' |
+film 1
+|        |
+|        |
+|        |
+|        |
+| .' . ' |
+film 2
+|        |
+|        |
+|        |
+|   '    |
+| ,'.',.'|
+film 3
+|        |
+|        |
+|        |
+|  , ,   |
+|,;',;',;|
+barnacles 0
+|        |
+|        |
+|        |
+|        |
+|   ^    |
+barnacles 1
+|        |
+|        |
+|        |
+|        |
+|  ^^ ^  |
+barnacles 2
+|        |
+|        |
+|        |
+|   ^    |
+| ^^A^^^ |
+barnacles 3
+|        |
+|        |
+|  ^  ^  |
+| ^A^^A^ |
+|^A^AA^A^|
+kelp 0
+|        |
+|        |
+|        |
+|        |
+|   ,    |
+kelp 1
+|        |
+|        |
+|        |
+|   (    |
+|  ,)    |
+kelp 2
+|        |
+|        |
+|   )    |
+|  (  )  |
+|  )(,(  |
+kelp 3
+|    (   |
+|   )  ( |
+|  (   ) |
+|  )  (  |
+| ,)(,)(,|
+mussels 0
+|        |
+|        |
+|        |
+|        |
+|   ()   |
+mussels 1
+|        |
+|        |
+|        |
+|        |
+|  (()() |
+mussels 2
+|        |
+|        |
+|        |
+|   ()   |
+| (()()()|
+mussels 3
+|        |
+|        |
+|   ()   |
+|  (()() |
+|(()()())|
+anemone 0
+|        |
+|        |
+|        |
+|        |
+|   ,:,  |
+anemone 1
+|        |
+|        |
+|        |
+|   \|/  |
+|  _\|/_ |
+anemone 2
+|        |
+|        |
+|  \ | / |
+|  \\|// |
+| _\\|//_|
+anemone 3
+|        |
+| \  |  /|
+|  \ | / |
+|-\\\|//-|
+|_.-\|/-.|
+star 0
+|        |
+|        |
+|        |
+|        |
+|   -*-  |
+star 1
+|        |
+|        |
+|        |
+|   \|/  |
+|  _/*\_ |
+star 2
+|        |
+|        |
+|    |   |
+|  _\|/_ |
+| '-/*\-'|
+star 3
+|        |
+|        |
+|   _|_  |
+| _-\|/-_|
+|'-_/*\_-|
+crab 0
+|        |
+|        |
+|        |
+|        |
+|  <@>   |
+crab 1
+|        |
+|        |
+|        |
+|   _    |
+| \(@)/  |
+crab 2
+|        |
+|        |
+|   __   |
+|  (@@)  |
+| \(__)/ |
+crab 3
+|        |
+|   __   |
+|  /@@\  |
+| (@@@@) |
+|\ \__/ /|
+urchin 0
+|        |
+|        |
+|        |
+|        |
+|   *    |
+urchin 1
+|        |
+|        |
+|        |
+|   \|/  |
+|   -*-  |
+urchin 2
+|        |
+|        |
+|  \ | / |
+|  -***- |
+|  /|||\ |
+urchin 3
+|        |
+|  \ | / |
+| -\\|//-|
+|--*###*-|
+| -/|||\-|
