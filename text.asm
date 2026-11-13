@@ -32,8 +32,8 @@ t_walk: db      'You will cross it when you go.',0
 t_guard: db     'A cairn guards it.',0
 t_latest: db    'Latest: ',0
 t_colon: db     ': ',0
-t_nothing: db   'Nothing has happened yet. Choose a rock (1-0), SPACE puts a cairn on it. Then wait.',0
-t_full:  db     'All five stones are placed. Lift a cairn first (SPACE on a rock that has one).',0
+t_nothing: db   'Nothing has happened yet. Pick a rock (1-0), SPACE puts a cairn on it. Wait.',0
+t_full:  db     'All five stones are placed. Lift a cairn first (SPACE on a rock with one).',0
 t_nameq: db     'Name this rock (7 letters, Enter): ',0
 t_keys: db      ' 1-0 pick  SPACE cairn  N name  T tides  J log  B bell  R reset  ? help  Q quit',0
 t_press: db     'press a key',0
@@ -143,4 +143,4 @@ t_nochg: db     'none',0
 t_unclean: db   'Last time you left without a word. The open rocks were walked over anyway.',0
 t_bellon: db    'The bell is on: it rings when a tide turns and at low water.',0
 t_belloff: db   'The bell is off.',0
-t_resetq: db    'Start a new pool? Every rock, name and cairn is lost.  Y = yes, any other key = no',0
+t_resetq: db    'Start a new pool? All rocks, names and cairns are lost.  Y = yes, else no',0
