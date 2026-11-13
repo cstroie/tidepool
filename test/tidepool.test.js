@@ -40,7 +40,7 @@ test('a first visit, a cairn, leaving, and a week away: the pool has changed', {
     const { disk, visit } = await fresh();
     let v = await visit(disk, T0);
     v.start('/100'); v.run(1);
-    assert.match(v.text(), /a very slow garden you can't control/);
+    assert.match(v.text(), /A very slow garden you can't control/);
     v.type(' '); v.run(1);
     assert.match(v.text(), /day 1, /);
     assert.match(v.text(), /Cairn stones: o o o o o \(5 left\)/);
@@ -184,7 +184,7 @@ test('a rename does not rewrite the journal; R starts a new pool after a Y', { s
     v.type('n'); v.run(0.5);
     assert.match(v.text(), /Zed/, 'any other key keeps the pool');
     v.type('R'); v.run(0.5); v.type('Y'); v.run(1);
-    assert.match(v.text(), /a very slow garden/);
+    assert.match(v.text(), /A very slow garden/);
     v.type(' '); v.run(1);
     assert.match(v.text(), /day 1, /);
     assert.doesNotMatch(v.text(), /Zed/);
