@@ -890,11 +890,29 @@ pressakey: ld   b,23
         call    getkey
         ret
 
-intro:  call    banner
+intro:  call    cls
+        ld      b,2
+        ld      c,31            ; '~ T I D E P O O L ~' centred
+        call    gotoxy
+        ld      a,A_BOLD
+        call    setattr
+        ld      hl,t_title
+        call    puts
+        xor     a
+        call    setattr
         ld      b,4
         ld      hl,t_intro
         call    cblock
-        jp      pressakey
+        ld      b,23
+        ld      c,35            ; 'press a key' centred
+        call    gotoxy
+        ld      a,A_BLINK
+        call    setattr
+        ld      hl,t_press
+        call    puts
+        xor     a
+        call    setattr
+        jp      getkey
 
 welcome: call   banner
         ld      b,4
