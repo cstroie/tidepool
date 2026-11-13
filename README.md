@@ -13,11 +13,14 @@ choose, then give it time. Name your rocks (N), read the tide table (T) and the 
 ring the bell when a tide turns (B), or start a new pool (R). Seasons follow the date.
 
 Z80 assembly, CP/M 2.2, 80x24, VT100 (line drawing, dim, bold, blink, reverse) / VT52 / ADM-3A.
-Written for [DigitalRerun](https://github.com/cstroie/digital-rerun), where it sits on the shelf,
-and where the machine has a clock device on port 20 to read the date and time from.
+A standalone project: it runs on any CP/M 2.2 machine with a real-time clock on port 20 (to read
+the date and time from; without one every visit is a single tide). It is shipped, unchanged, on the
+shelf of [DigitalRerun](https://github.com/cstroie/digital-rerun), whose emulator the tests use.
 Player's guide: [docs/PLAYING.txt](docs/PLAYING.txt). Design notes: [DESIGN.md](DESIGN.md).
 
     sh build.sh        art.inc (node mkart.js), then TIDEPOOL.COM (pasmo)
     node --test test/  needs a DigitalRerun checkout (ROOT=<dir>, default ../../..)
 
-MIT licence.
+MIT, see [LICENSE](LICENSE). Copyright (c) 2026 Costin Stroie. TIDEPOOL is a separate project from
+DigitalRerun: DigitalRerun only ships the built TIDEPOOL.COM, under this same licence, and its own
+licence terms do not apply to it.
