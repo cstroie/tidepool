@@ -837,6 +837,35 @@ bk1:    ld      a,(hl)
 bk2:    call    putc
         jr      bk1
 
+; cblock: HL = lines; prints from row B, each line centred on 80 columns
+cblock: push    hl
+        ld      c,0
+cb2:    ld      a,(hl)
+        or      a
+        jr      z,cb3
+        cp      LF
+        jr      z,cb3
+        inc     hl
+        inc     c
+        jr      cb2
+cb3:    pop     hl
+        ld      a,80
+        sub     c
+        srl     a
+        inc     a
+        ld      c,a
+        call    gotoxy
+cb4:    ld      a,(hl)
+        inc     hl
+        or      a
+        ret     z
+        cp      LF
+        jr      z,cb5
+        call    putc
+        jr      cb4
+cb5:    inc     b
+        jr      cblock
+
 banner: call    cls
         ld      b,2
         ld      c,3
@@ -864,7 +893,7 @@ pressakey: ld   b,23
 intro:  call    banner
         ld      b,4
         ld      hl,t_intro
-        call    block
+        call    cblock
         jp      pressakey
 
 welcome: call   banner

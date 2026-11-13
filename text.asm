@@ -63,18 +63,18 @@ t_tt1:  db      'THE TIDE TABLE',LF
 
 t_jt:   db      'THE JOURNAL',LF,'What the pool did, newest first.',0
 
-t_intro: db     'a very slow garden you can',39,'t control',LF,LF
-        db      'Ten rocks and a tide table. Things grow when the tide is in.',LF
+t_intro: db     'A very slow garden you can',39,'t control',LF,LF
+        db      'Ten rocks and a tide table. Life settles in when the water is high.',LF
         db      'You decide only what not to disturb.',LF,LF
-        db      'The pool keeps the real time of the clock. Come back tomorrow, or in a',LF
-        db      'week: the tides will have kept on without you, fourteen of them, and',LF
+        db      'The pool keeps the real time of the clock. Be gone a day or a week:',LF
+        db      'the tides carry on regardless, fourteen in a week, and on your return',LF
         db      'something will have settled, grown, been eaten or torn away.',LF,LF
-        db      'You have five cairn stones. SPACE puts one on a rock (or lifts it).',LF
-        db      'A rock with a cairn is left alone. When you go, you wade out across the',LF
-        db      'rocks that have none, and what lives there is stepped on and starts a',LF
-        db      'little smaller. The rare things (anemones, sea stars) only come to',LF
-        db      'rocks that stay quiet for days. Visit often and the common things win.',LF,LF
-        db      'There is nothing to win. Choose, then go away for a while.',0
+        db      'You have five cairn stones. SPACE sets one on a rock, or lifts it.',LF
+        db      'A marked rock is left alone. When you go, you wade out over the bare',LF
+        db      'ones, crushing what lives there and setting it back a little. Anemones',LF
+        db      'and sea stars, the rare ones, favour spots that stay quiet for days.',LF
+        db      'Visit often and the common species crowd them out.',LF,LF
+        db      'There is nothing to win. Choose, then give it time.',0
 
 t_bye:  db      'The pool carries on without you.',LF,0
 
