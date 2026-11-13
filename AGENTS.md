@@ -5,7 +5,7 @@ Standalone project; DigitalRerun only ships the built `TIDEPOOL.COM`. Read `DESI
 
 - Build: `sh build.sh` (needs `node` and `pasmo`). `art.inc` is generated from `art.txt`: edit
   `art.txt`, never `art.inc`. `TIDEPOOL.COM` is not in git; releases carry it.
-- Test: `ROOT=<digital-rerun checkout> node --test test/` (build first). The tests run the real
+- Test: `ROOT=<digital-rerun checkout> node --test test/*.test.js` (build first). The tests run the real
   program in DigitalRerun's emulator; `tools/screen.js` and `tools/visit.js` do the same by hand.
 - Screen: 80 columns. Messages start at column 2, so keep any string in `text.asm` to 78
   characters or fewer, or it wraps onto the key bar.

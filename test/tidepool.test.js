@@ -7,7 +7,7 @@ const path = require('node:path');
 const { parse, build } = require('../mkart.js');
 
 const APP = path.join(__dirname, '..');
-const ROOT = process.env.ROOT || path.join(APP, '..', '..');
+const ROOT = process.env.ROOT || path.join(APP, '..', 'digital-rerun');
 const haveRoot = fs.existsSync(path.join(ROOT, 'js/machine.js'));
 
 test('art.inc is what art.txt builds to, and art.txt has the fixed 1 + 8 x 4 pictures', () => {

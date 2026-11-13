@@ -18,12 +18,19 @@ the date and time from; without one every visit is a single tide). It is shipped
 shelf of [DigitalRerun](https://github.com/cstroie/digital-rerun), whose emulator the tests use.
 Player's guide: [docs/PLAYING.txt](docs/PLAYING.txt). Design notes: [DESIGN.md](DESIGN.md).
 
-    sh build.sh        art.inc (node mkart.js), then TIDEPOOL.COM (pasmo)
-    node --test test/  needs a DigitalRerun checkout (ROOT=<dir>, default ../../..)
+## Build and test
 
-Version: see [VERSION](VERSION) and [CHANGELOG.md](CHANGELOG.md). `TIDEPOOL.COM` is not kept in the
-repository: take it from the [releases](https://github.com/cstroie/tidepool/releases), or build it
-with `sh build.sh` (the tests need it built first).
+To build `TIDEPOOL.COM` you need `node` and [pasmo](https://pasmo.speccy.org/) (`apt install pasmo`):
+
+    sh build.sh                      art.inc from art.txt (node mkart.js), then TIDEPOOL.COM (pasmo)
+
+The tests play the real program in the emulator of a
+[DigitalRerun](https://github.com/cstroie/digital-rerun) checkout. Build first, and say where the
+checkout is (default: a `digital-rerun` folder next to this one). Without it only the art tests run:
+
+    ROOT=/path/to/digital-rerun node --test test/*.test.js
+
+The version is in [VERSION](VERSION), the history in [CHANGELOG.md](CHANGELOG.md).
 
 MIT, see [LICENSE](LICENSE). Copyright (c) 2026 Costin Stroie. TIDEPOOL is a separate project from
 DigitalRerun: DigitalRerun only ships the built TIDEPOOL.COM, under this same licence, and its own
