@@ -8,7 +8,8 @@ const { parse, build } = require('../mkart.js');
 
 const APP = path.join(__dirname, '..');
 const ROOT = process.env.ROOT || path.join(APP, '..', 'digital-rerun');
-const haveRoot = fs.existsSync(path.join(ROOT, 'js/machine.js'));
+// the emulator tests need the checkout and a built TIDEPOOL.COM (it is not in git: sh build.sh)
+const haveRoot = fs.existsSync(path.join(ROOT, 'js/machine.js')) && fs.existsSync(path.join(APP, 'TIDEPOOL.COM'));
 
 test('art.inc is what art.txt builds to, and art.txt has the fixed 1 + 8 x 4 pictures', () => {
     const txt = fs.readFileSync(path.join(APP, 'art.txt'), 'utf8');
