@@ -21,6 +21,10 @@ Player's guide: [docs/PLAYING.txt](docs/PLAYING.txt). Design notes: [DESIGN.md](
     sh build.sh        art.inc (node mkart.js), then TIDEPOOL.COM (pasmo)
     node --test test/  needs a DigitalRerun checkout (ROOT=<dir>, default ../../..)
 
+Version: see [VERSION](VERSION) and [CHANGELOG.md](CHANGELOG.md). `TIDEPOOL.COM` is not kept in the
+repository: take it from the [releases](https://github.com/cstroie/tidepool/releases), or build it
+with `sh build.sh` (the tests need it built first).
+
 MIT, see [LICENSE](LICENSE). Copyright (c) 2026 Costin Stroie. TIDEPOOL is a separate project from
 DigitalRerun: DigitalRerun only ships the built TIDEPOOL.COM, under this same licence, and its own
 licence terms do not apply to it.
